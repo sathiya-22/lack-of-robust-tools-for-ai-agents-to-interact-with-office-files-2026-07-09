@@ -1,0 +1,66 @@
+import os
+import google.generativeai as genai
+import json
+from config import Settings
+
+def main():
+    """
+    Main function to demonstrate an AI agent's ability to generate plans
+    for Office file interaction using Google Gemini.
+    """
+    settings = Settings()
+
+    # Configure the Google Generative AI client
+    genai.configure(api_key=settings.api_key)
+
+    # Initialize the Gemini model with specified settings
+    model = genai.GenerativeModel(
+        model_name=settings.model_name,
+        generation_config=genai.types.GenerationConfig(
+            temperature=settings.temperature,
+            max_output_tokens=settings.max_tokens,
+            response_mime_type="application/json" # Request JSON output for structured plans
+        )
+    )
+
+    # Define a complex problem description for the AI agent
+    problem_description = """
+    The AI agent needs to prepare a quarterly sales presentation.
+    Task:
+    1. Open 'Q4_Sales_Review.pptx'.
+    2. Go to the third slide.
+    3. Add a new bullet point under the existing 'Key Achievements' section: "Successfully onboarded 5 new enterprise clients."
+    4. Find the slide titled 'Regional Performance' and ensure the title font size is 48pt. If not, update it.
+    5. Save the updated presentation as 'Q4_Sales_Review_FINAL.pptx'.
+    """
+
+    # Craft the prompt for the LLM to generate a structured plan
+    prompt = f"""
+    You are an AI assistant designed to help other AI agents programmatically interact with Microsoft Office files.
+    Given a natural language task, generate a structured plan or pseudo-code using a hypothetical but robust 'office_automation_api'.
+    The output should be a JSON object with a single top-level key 'plan', which contains a list of steps.
+    Each step in the plan should be an object with an 'action' (e.g., 'open_presentation', 'add_bullet_point')
+    and 'details' (e.g., 'file_path', 'slide_index', 'text', 'section_title', 'font_size').
+
+    Task: {problem_description}
+
+    Generate the plan for the given task.
+    """
+
+    print("Sending request to the Gemini model to generate an Office interaction plan...\n")
+    try:
+        response = model.generate_content(prompt)
+        # Parse and pretty-print the JSON response
+        if response.text:
+            plan_json = json.loads(response.text)
+            print("--- Generated Office Interaction Plan (JSON) ---")
+            print(json.dumps(plan_json, indent=2))
+            print("\n--- End of Plan ---")
+        else:
+            print("No plan generated. The model response was empty.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Please ensure your GEMINI_API_KEY is correctly set and network is available.")
+
+if __name__ == "__main__":
+    main()
