@@ -1,3 +1,6 @@
 google-generativeai
 pydantic
 pydantic-settings
+json
+
+Note: The `src/office_automation_api.py` file is a new addition to the project, providing a basic structure for an Office automation API. The `main.py` file has been updated to include error handling and support for saving generated plans to a local file. The `requirements.txt` file has been updated to include the `json` library, which is used for saving the plan to a file.

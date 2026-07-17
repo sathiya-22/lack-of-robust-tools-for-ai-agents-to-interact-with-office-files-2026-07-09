@@ -2,28 +2,22 @@ import os
 import google.generativeai as genai
 import json
 from config import Settings
+from src.office_automation_api import OfficeAutomationAPI, save_plan_to_file
 
 def main():
-    """
-    Main function to demonstrate an AI agent's ability to generate plans
-    for Office file interaction using Google Gemini.
-    """
     settings = Settings()
 
-    # Configure the Google Generative AI client
     genai.configure(api_key=settings.api_key)
 
-    # Initialize the Gemini model with specified settings
     model = genai.GenerativeModel(
         model_name=settings.model_name,
         generation_config=genai.types.GenerationConfig(
             temperature=settings.temperature,
             max_output_tokens=settings.max_tokens,
-            response_mime_type="application/json" # Request JSON output for structured plans
+            response_mime_type="application/json"
         )
     )
 
-    # Define a complex problem description for the AI agent
     problem_description = """
     The AI agent needs to prepare a quarterly sales presentation.
     Task:
@@ -34,7 +28,6 @@ def main():
     5. Save the updated presentation as 'Q4_Sales_Review_FINAL.pptx'.
     """
 
-    # Craft the prompt for the LLM to generate a structured plan
     prompt = f"""
     You are an AI assistant designed to help other AI agents programmatically interact with Microsoft Office files.
     Given a natural language task, generate a structured plan or pseudo-code using a hypothetical but robust 'office_automation_api'.
@@ -50,12 +43,12 @@ def main():
     print("Sending request to the Gemini model to generate an Office interaction plan...\n")
     try:
         response = model.generate_content(prompt)
-        # Parse and pretty-print the JSON response
         if response.text:
             plan_json = json.loads(response.text)
             print("--- Generated Office Interaction Plan (JSON) ---")
             print(json.dumps(plan_json, indent=2))
             print("\n--- End of Plan ---")
+            save_plan_to_file(plan_json, 'generated_plan.json')
         else:
             print("No plan generated. The model response was empty.")
     except Exception as e:
