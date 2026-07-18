@@ -7,6 +7,10 @@ from src.office_automation_api import OfficeAutomationAPI, save_plan_to_file
 def main():
     settings = Settings()
 
+    if not settings.api_key:
+        print("Error: GEMINI_API_KEY is not set. Please set the environment variable or add it to a .env file.")
+        return
+
     genai.configure(api_key=settings.api_key)
 
     model = genai.GenerativeModel(
